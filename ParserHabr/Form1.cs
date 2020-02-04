@@ -9,6 +9,7 @@ namespace ParserHabr
 {
     public partial class Form1 : Form
     {
+        private Dictionary<string, string> parsing = new Dictionary<string, string>();
         public Form1()
         {
             InitializeComponent();
@@ -16,17 +17,22 @@ namespace ParserHabr
 
         private void StartButton_Click(object sender, EventArgs e)
         {
-            var parser = new Parser("https://habr.com/ru/hub/csharp/", "1", "95");
-            // Thread myThread = new Thread(new ThreadStart(parser.ParsTover));
-            // myThread.Start();
-            parser.ParsTover();
+            var parser = new Parser("https://habr.com/ru/hub/csharp/", "33", "95");
+            parsing = parser.ParsTover();
+
+
+            foreach(var post in parsing)
+            {
+                dataGridView1.Rows.Add(post.Key.Substring(5, post.Key.Length - 6),
+                        post.Value.Replace(" ", ""));
+            }
+
 
         }
 
         private void Wrap()
         {
-            var parser = new Parser("https://habr.com/ru/hub/csharp/", "1", "95");
-            parser.ParsTover();
+            
         }
     }
 }

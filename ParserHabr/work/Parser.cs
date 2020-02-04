@@ -2,7 +2,6 @@
 using AngleSharp.Html.Parser;
 using Leaf.xNet;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using AngleSharp.Dom;
 
@@ -48,9 +47,15 @@ namespace ParserHabr.work
             request.AddHeader("Upgrade-Insecure-Requests", "1");
             request.KeepAlive = true;
             request.UserAgentRandomize();
+            var pages = new List<string>();
+
+            foreach (var html in GenerateHtmlPage())
+            {
+                pages.Add(request.Get(html).ToString());
+            }
 
 
-            return GenerateHtmlPage().Select(html => request.Get(html).ToString()).ToList();
+            return pages;
         }
 
         public Dictionary<string, string> ParsTover()
@@ -58,7 +63,16 @@ namespace ParserHabr.work
             List<string> pages = GetPages();
             Dictionary<string, string> headerCollection = new Dictionary<string, string>();
             HtmlParser htmlParser = new HtmlParser();
-            var blockList = pages.Select(page => htmlParser.ParseDocument(page)).Select(doc => doc.QuerySelectorAll("li.content-list__item.content-list__item_post.shortcuts_item>article")).ToList();
+            var blockList = new List<IHtmlCollection<IElement>>();
+
+            for (var index = 0; index < pages.Count; index++)
+            {
+                var page = pages[index];
+                var doc = htmlParser.ParseDocument(page);
+                blockList.Add(
+                        doc.QuerySelectorAll(
+                                "li.content-list__item.content-list__item_post.shortcuts_item>article"));
+            }
 
             pages = null;
 
@@ -75,9 +89,10 @@ namespace ParserHabr.work
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show(e.ToString());
+                        // MessageBox.Show(e.ToString());
                         continue;
                     }
+                    
                 }
             }
 
