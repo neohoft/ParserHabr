@@ -1,9 +1,8 @@
-﻿using System;
+﻿using ParserHabr.work;
+using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using ParserHabr.work;
+
 
 namespace ParserHabr
 {
@@ -17,7 +16,7 @@ namespace ParserHabr
 
         private void StartButton_Click(object sender, EventArgs e)
         {
-            var parser = new Parser("https://habr.com/ru/hub/csharp/", "33", "95");
+            var parser = new Parser(textBox1.Text, numericUpDown1.Text, numericUpDown2.Text);
             parsing = parser.ParsTover();
 
 
@@ -30,9 +29,5 @@ namespace ParserHabr
 
         }
 
-        private void Wrap()
-        {
-            
-        }
     }
 }

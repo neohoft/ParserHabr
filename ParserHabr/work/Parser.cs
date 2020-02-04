@@ -1,9 +1,8 @@
-﻿using System;
+﻿using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Leaf.xNet;
 using System.Collections.Generic;
-using System.Windows.Forms;
-using AngleSharp.Dom;
+using static System.Int32;
 
 namespace ParserHabr.work
 {
@@ -28,9 +27,9 @@ namespace ParserHabr.work
         {
             var urls = new List<string>();
 
-            for (int i = int.Parse(start); i <= int.Parse(end); i++)
+            for (int i = Parse(start); i <= Parse(end); i++)
             {
-                urls.Add($"{url}page{i.ToString()}/");
+                urls.Add(item: $"{url}page{i.ToString()}/");
             }
 
             return urls;
@@ -38,20 +37,23 @@ namespace ParserHabr.work
 
         private List<string> GetPages()
         {
-            var request = new HttpRequest();
-            request.AddHeader("Accept-Encoding", "gzip, deflate");
-            request.AddHeader(HttpHeader.Accept,
-                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-            request.AddHeader(HttpHeader.AcceptLanguage, "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
-            request.AddHeader("Cache-Control", "max-age=0");
-            request.AddHeader("Upgrade-Insecure-Requests", "1");
-            request.KeepAlive = true;
-            request.UserAgentRandomize();
             var pages = new List<string>();
 
-            foreach (var html in GenerateHtmlPage())
+            using (var request = new HttpRequest())
             {
-                pages.Add(request.Get(html).ToString());
+                request.AddHeader("Accept-Encoding", "gzip, deflate");
+                request.AddHeader(HttpHeader.Accept,
+                        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+                request.AddHeader(HttpHeader.AcceptLanguage, "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
+                request.AddHeader("Cache-Control", "max-age=0");
+                request.AddHeader("Upgrade-Insecure-Requests", "1");
+                request.KeepAlive = true;
+                request.UserAgentRandomize();
+
+                foreach (var html in GenerateHtmlPage())
+                {
+                    pages.Add(request.Get(html).ToString());
+                }
             }
 
 
@@ -74,8 +76,6 @@ namespace ParserHabr.work
                                 "li.content-list__item.content-list__item_post.shortcuts_item>article"));
             }
 
-            pages = null;
-
             for (var i = 0; i < blockList.Count; i++)
             {
                 var block = blockList[i];
@@ -87,12 +87,10 @@ namespace ParserHabr.work
                         headerCollection.Add(heading.QuerySelector("h2").TextContent,
                                 heading.QuerySelector("h2>a").GetAttribute("href"));
                     }
-                    catch (Exception e)
+                    catch
                     {
                         // MessageBox.Show(e.ToString());
-                        continue;
                     }
-                    
                 }
             }
 
@@ -100,4 +98,5 @@ namespace ParserHabr.work
             return headerCollection;
         }
     }
+
 }
