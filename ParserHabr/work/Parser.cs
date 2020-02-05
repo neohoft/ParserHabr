@@ -1,7 +1,9 @@
-﻿using AngleSharp.Dom;
+﻿using System;
+using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Leaf.xNet;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using static System.Int32;
 
 namespace ParserHabr.work
@@ -10,11 +12,12 @@ namespace ParserHabr.work
     {
         private readonly string start;
         private readonly string end;
-        private readonly string url;
+        private readonly string link;
 
-        public Parser(string url, string start, string end)
+        public Parser(string link, string start, string end)
+
         {
-            this.url = url;
+            this.link = link ;
             this.start = start;
             this.end = end;
         }
@@ -22,19 +25,22 @@ namespace ParserHabr.work
         /// <summary>
         /// Генерирует страницы 
         /// </summary>
-        /// <returns></returns>
-        private IEnumerable<string> GenerateHtmlPage()
+        /// <returns>Возврощает список урлов</returns>
+        private List<string> GenerateHtmlPage()
         {
             var urls = new List<string>();
 
             for (int i = Parse(start); i <= Parse(end); i++)
             {
-                urls.Add(item: $"{url}page{i.ToString()}/");
+                urls.Add(item: $"{link}page{i.ToString()}/");
             }
 
             return urls;
         }
-
+        /// <summary>
+        /// Получает список Html страниц
+        /// </summary>
+        /// <returns></returns>
         private List<string> GetPages()
         {
             var pages = new List<string>();
@@ -60,6 +66,10 @@ namespace ParserHabr.work
             return pages;
         }
 
+        /// <summary>
+        /// Парсит Html страницы
+        /// </summary>
+        /// <returns>Возрощает словарь, заголовок, ссылка</returns>
         public Dictionary<string, string> ParsTover()
         {
             List<string> pages = GetPages();
@@ -67,33 +77,29 @@ namespace ParserHabr.work
             HtmlParser htmlParser = new HtmlParser();
             var blockList = new List<IHtmlCollection<IElement>>();
 
-            for (var index = 0; index < pages.Count; index++)
+            foreach (var page in pages)
             {
-                var page = pages[index];
                 var doc = htmlParser.ParseDocument(page);
                 blockList.Add(
                         doc.QuerySelectorAll(
                                 "li.content-list__item.content-list__item_post.shortcuts_item>article"));
             }
 
-            for (var i = 0; i < blockList.Count; i++)
+            foreach (var block in blockList)
             {
-                var block = blockList[i];
-                for (var index = 0; index < block.Length; index++)
+                foreach (var heading in block)
                 {
                     try
                     {
-                        var heading = block[index];
                         headerCollection.Add(heading.QuerySelector("h2").TextContent,
                                 heading.QuerySelector("h2>a").GetAttribute("href"));
                     }
                     catch
                     {
-                        // MessageBox.Show(e.ToString());
+                         // MessageBox.Show("Error");
                     }
                 }
             }
-
 
             return headerCollection;
         }
